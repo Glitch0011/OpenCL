@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)References\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)References\include;$(ProjectDir)Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)References\lib\x86;$(IncludePath);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>

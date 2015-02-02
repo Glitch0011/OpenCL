@@ -6,20 +6,7 @@
 
 using namespace std;
 
-static std::vector<char> loadText(std::string file)
-{
-	ifstream ifs(file.c_str(), ios::binary | ios::ate);
-	ifstream::pos_type pos = ifs.tellg();
-
-	std::vector<char> result(pos);
-
-	ifs.seekg(0, ios::beg);
-	ifs.read(&result[0], pos);
-
-	return result;
-}
-
-int setupDevice(cl_platform_id& platform, cl_device_id* device)
+/*int setupDevice(cl_platform_id& platform, cl_device_id* device)
 {
 	cl_int err = 0;
 	if ((err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 1, device, nullptr)) != CL_SUCCESS)
@@ -158,11 +145,11 @@ int main()
 	cl_int err;
 
 	inputBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, ARRAY_SIZE * sizeof(float), data, &err);
-	sumBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, numGroups * sizeof(float), sum, &err);
+	sumBuffer = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, numGroups  * sizeof(float), sum, &err);
 
 	if (err != CL_SUCCESS)
 		return -1;
-	
+
 	cl_command_queue queue = clCreateCommandQueue(context, device, 0, &err);
 	if (err != CL_SUCCESS)
 		return -1;
@@ -195,7 +182,6 @@ int main()
 	else
 		printf("Check passed.\n");
 
-	/* Deallocate resources */
 	clReleaseKernel(kernel);
 	clReleaseMemObject(sumBuffer);
 	clReleaseMemObject(inputBuffer);
@@ -203,4 +189,4 @@ int main()
 	clReleaseProgram(program);
 	clReleaseContext(context);
 	return 0;
-}
+}*/

@@ -8,8 +8,9 @@ __kernel void add_numbers(__global float4* data,
 
 	global_addr = get_global_id(0) * 2;
 	
-	input1 = data[global_addr];
-	input2 = data[global_addr+1];
+	input1 = data[global_addr + 0];
+	input2 = data[global_addr + 1];
+
 	sum_vector = input1 + input2;
 
 	local_addr = get_local_id(0);
