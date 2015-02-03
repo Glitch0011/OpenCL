@@ -116,7 +116,7 @@ void OpenGLGraphicsEngine::Render()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glColor4f(1, 1, 1, 0.1f);
+	glColor4f(1, 1, 1, 0.05f);
 	glPointSize(5.0);
 	
 	glDrawArrays(GL_POINTS, 0, pointCount);

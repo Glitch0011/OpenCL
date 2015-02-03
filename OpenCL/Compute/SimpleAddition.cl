@@ -6,13 +6,12 @@ typedef struct Boid{
 
 __kernel void add_numbers(__global Boid* data)//, __local float* local_result, __global float* group_result)
 {
+
 	uint global_addr = get_global_id(0);
 	
 	Boid boid = data[global_addr];
 
 	float2 gravity; gravity.y = -0.01f; gravity.x = 0;
-
-	//float2 dir = normalize(gravity - boid.pos) * 0.1f;
 
 	boid.vel += gravity;
 	boid.vel *= 0.99f;
