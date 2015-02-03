@@ -3,7 +3,7 @@
 int main(int argc, char* argv[])
 {
 	OpenGLGraphicsEngine graphicsEngine;
-	OpenCLGameEngine gameEngine;
+	OpenCLGameEngine gameEngine = OpenCLGameEngine(&graphicsEngine);
 
 	while (graphicsEngine.running)
 	{

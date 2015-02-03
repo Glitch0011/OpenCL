@@ -9,10 +9,14 @@
 class OpenGLGraphicsEngine
 {
 	SDL_Window* mainWindow;
-	SDL_GLContext mainContext;
-	
+
 public:
+
+	SDL_GLContext mainContext;
+	unsigned int bufferID;
+
 	bool running = true;
+	const int pointCount = 100;
 
 	OpenGLGraphicsEngine();
 

@@ -1,12 +1,17 @@
 #pragma once
 
 #include <FileHelperFunctions.h>
+
+#pragma OPENCL EXTENSION CL_APPLE_gl_sharing : enable
+#pragma OPENCL EXTENSION CL_KHR_gl_sharing : enable
+
 #include <CL/cl.hpp>
 #include <vector>
 #include <string>
 
-
 #define ARRAY_SIZE 64
+
+class OpenGLGraphicsEngine;
 
 class OpenCLGameEngine
 {
@@ -23,8 +28,10 @@ class OpenCLGameEngine
 
 	cl::Buffer inputBuffer, sumBuffer;
 	
+	OpenGLGraphicsEngine* glEngine;
+
 public:
-	OpenCLGameEngine();
+	OpenCLGameEngine(OpenGLGraphicsEngine* glEngine);
 
 	void SetupData();
 
