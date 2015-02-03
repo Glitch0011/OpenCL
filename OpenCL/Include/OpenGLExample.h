@@ -1,18 +1,20 @@
 #pragma once
 
-#include <SDL.h>
+//#include <SDL.h>
 
 #define PROGRAM_NAME "Tutorial1"
 
 #include <functional>
 
+class GLFWwindow;
+
 class OpenGLGraphicsEngine
 {
-	SDL_Window* mainWindow;
-
+	GLFWwindow* mainWindow;
+	
 public:
+	//SDL_GLContext mainContext;
 
-	SDL_GLContext mainContext;
 	unsigned int bufferID;
 
 	bool running = true;
@@ -25,6 +27,8 @@ public:
 	void Render();
 
 	void Update();
+
+	int GLFWCharCallback(GLFWwindow* pWindow, unsigned int pChar);
 
 	~OpenGLGraphicsEngine();
 };

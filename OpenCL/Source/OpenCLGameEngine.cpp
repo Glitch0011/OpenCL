@@ -112,17 +112,21 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 			}
 		}
 
+		this->context() = lContext;
+		//this->deviceID = lDeviceId;
+		//this->platform = lPlatformId;
+
 		std::vector<char> data = loadText(".\\..\\Compute\\SimpleAddition.cl");
 
 		cl::Program::Sources source(1, std::make_pair((char*)data.data(), data.size()));
 		program = cl::Program(context, source);
-		program.build(devices);
+		std::vector<cl::Device> realDevices{ lDeviceId };
+		program.build(realDevices);
 
 		this->glEngine = glEngine;
 
 		SetupData();
 	}
-
 	catch (exception e)
 	{
 		return;
@@ -133,19 +137,19 @@ void OpenCLGameEngine::SetupData()
 {
 	cl_int err = CL_SUCCESS;
 
-	auto buffer = cl::BufferGL(this->context, CL_MEM_READ_WRITE, this->glEngine->bufferID, &err);
+	this->graphicsBuffer = cl::BufferGL(this->context, CL_MEM_READ_WRITE, this->glEngine->bufferID, &err);
 
-	for (int i = 0; i < ARRAY_SIZE; i++)
+	/*for (int i = 0; i < ARRAY_SIZE; i++)
 		numberData[i] = 1.0f * i;
 
 	inputBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, ARRAY_SIZE * sizeof(float), numberData, &err);
-	sumBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, numGroups * sizeof(float), sum, &err);
+	sumBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, numGroups * sizeof(float), sum, &err);*/
 
 	kernel = cl::Kernel(program, "add_numbers", &err);
 
-	kernel.setArg(0, inputBuffer);
-	kernel.setArg(1, localSize * sizeof(float), nullptr);
-	kernel.setArg(2, sumBuffer);
+	kernel.setArg(0, graphicsBuffer);
+	//kernel.setArg(1, localSize * sizeof(float), nullptr);
+	//kernel.setArg(2, sumBuffer);
 }
 
 void OpenCLGameEngine::Update()

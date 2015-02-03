@@ -4,19 +4,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)References\include;$(ProjectDir)Include;$(SolutionDir)References\Glew\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)References\lib\x86;$(IncludePath);$(SolutionDir)References\Glew\lib\Release\Win32;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)References\include;$(ProjectDir)Include;$(SolutionDir)References\glew-1.12.0\include;$(SolutionDir)References\glfw-3.1.bin.WIN32\include;$(SolutionDir)References\\glm-0.9.6.1\glm;$(IncludePath)</IncludePath>
+    <LibraryPath>$(IncludePath);$(SolutionDir)References\lib\x86;$(SolutionDir)References\glfw-3.1.bin.WIN32\lib-vc2013;$(SolutionDir)References\glew-1.12.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>OpenCL.lib;SDL2.lib;SDL2main.lib;glu32.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenCL.lib;glu32.lib;opengl32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
     <ClCompile>
       <PreprocessorDefinitions>_WIN32;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
       <Command>XCOPY /Y "$(SolutionDir)References\lib\x86\SDL2.dll" "$(OutDir)"
-XCOPY /Y "$(SolutionDir)References\Glew\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
+XCOPY /Y "$(SolutionDir)References\glew-1.12.0\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup />

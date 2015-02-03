@@ -1,46 +1,58 @@
 #include <OpenGLExample.h>
 
-#include <GL/glew.h>
 #include <vector>
 #include <random>
 
-void checkSDLError(int line = -1)
-{
-#ifndef NDEBUG
-	const char *error = SDL_GetError();
-	if (*error != '\0')
-	{
-		printf("SDL Error: %s\n", error);
-		if (line != -1)
-			printf(" + line: %i\n", line);
-		SDL_ClearError();
-	}
+//Glew
+//#define GLEW_STATIC
+#include <GL/glew.h>
+
+#if defined (WIN32)
+#include <GL/wglew.h>
 #endif
+
+//#pragma comment(lib, "glew32.lib")
+
+//GLFW
+#include <GLFW/glfw3.h>
+
+int OpenGLGraphicsEngine::GLFWCharCallback(GLFWwindow* pWindow, unsigned int pChar)
+{
+	return 0;
 }
+
 
 OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	auto err = glGetError();
+
+	if (!glfwInit())
 		return;
 
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	//SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		
+	this->mainWindow = glfwCreateWindow(512, 512, "Hello", nullptr, nullptr);
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	glfwSetWindowUserPointer(this->mainWindow, this);
 
-	if (!(mainWindow = SDL_CreateWindow(PROGRAM_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 512, 512, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN)))
+	// Set the keyboard callback.
+	//glfwSetCharCallback(this->mainWindow, &GLFWCharCallback);
+
+	// Make the context current.
+	glfwMakeContextCurrent(this->mainWindow);
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK)
 		return;
 
+	glfwSwapInterval(0);
+
+	if (wglSwapIntervalEXT)
+		wglSwapIntervalEXT(0);
+
 	
-	checkSDLError(__LINE__);
-
-	mainContext = SDL_GL_CreateContext(mainWindow);
-	checkSDLError(__LINE__);
-
-	
-
-	SDL_GL_SetSwapInterval(1);
 
 	this->SetupEngine();
 }
@@ -61,12 +73,11 @@ struct Point
 	}
 };
 
-
 void OpenGLGraphicsEngine::SetupEngine()
 {
 	std::mt19937 random;
-	std::uniform_int_distribution<uint32_t> uint_dist10(0, 50);
-	std::uniform_int_distribution<uint32_t> uintd1(0, 255);
+	std::uniform_int_distribution<unsigned int> uint_dist10(0, 50);
+	std::uniform_int_distribution<unsigned int> uintd1(0, 255);
 
 	std::vector<Point> points;
 	
@@ -82,14 +93,12 @@ void OpenGLGraphicsEngine::SetupEngine()
 			0));
 	}
 
-	glewInit();
-
 	glGenBuffers(1, &bufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * points.size(), nullptr, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * points.size(), &points[0].x);
 
-	GLuint vertexAttributeobject;
+	GLuint vertexAttributeobject = 0;
 	glGenVertexArrays(1, &vertexAttributeobject);
 	glBindVertexArray(vertexAttributeobject);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
@@ -102,11 +111,8 @@ void OpenGLGraphicsEngine::SetupEngine()
 void OpenGLGraphicsEngine::Render()
 {
 	glViewport(0, 0, 512, 512);
-	int Width = 500, Height = 500;
 
-	const int gridWidth = 1024;
-	const int gridHeight = 1024;
-
+	glClearColor(0, 0, 0, 1);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glMatrixMode(GL_PROJECTION);
@@ -122,30 +128,18 @@ void OpenGLGraphicsEngine::Render()
 	
 	glFlush();
 
-	SDL_GL_SwapWindow(mainWindow);
+	glFinish();
+	
+	glfwSwapBuffers(this->mainWindow);
 }
 
 void OpenGLGraphicsEngine::Update()
 {
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		switch (event.type)
-		{
-		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_ESCAPE)
-				running = false;
-			break;
-		case SDL_QUIT:
-			running = false;
-			break;
-		}
-	}
+	glfwPollEvents();
 }
 
 OpenGLGraphicsEngine::~OpenGLGraphicsEngine()
 {
-	SDL_GL_DeleteContext(mainContext);
-	SDL_DestroyWindow(mainWindow);
-	SDL_Quit();
+	glfwDestroyWindow(this->mainWindow);
+	glfwTerminate();
 }

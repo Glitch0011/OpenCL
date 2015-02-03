@@ -1,10 +1,10 @@
-#include <iostream>
+/*#include <iostream>
 #include <CL/cl.h>
 #include <vector>
 #include <string>
 #include <fstream>
 
-using namespace std;
+using namespace std;*/
 
 /*int setupDevice(cl_platform_id& platform, cl_device_id* device)
 {

@@ -19,6 +19,7 @@ class OpenCLGameEngine
 	cl::Program program;
 	std::vector<cl::Device> devices;
 	cl::Kernel kernel;
+	cl::BufferGL graphicsBuffer;
 
 	const int globalSize = 8;
 	const int localSize = 4;
