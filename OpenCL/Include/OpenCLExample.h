@@ -20,12 +20,18 @@ class OpenCLGameEngine
 	std::vector<cl::Device> devices;
 	cl::Kernel kernel;
 	cl::BufferGL graphicsBuffer;
+	cl::Device device;
 
-	const int globalSize = 8;
-	const int localSize = 4;
+	cl_int err = CL_SUCCESS;
+
+	cl::Event event;
+	cl::CommandQueue queue;
+
+	int globalSize = 8;
+	int localSize = 4;
 	cl_int numGroups = globalSize / localSize;
 
-	float numberData[ARRAY_SIZE], sum[2], total, actual_sum;
+	//float numberData[100 * 2];// sum[2], total, actual_sum;
 
 	cl::Buffer inputBuffer, sumBuffer;
 	

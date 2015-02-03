@@ -18,7 +18,7 @@ public:
 	unsigned int bufferID;
 
 	bool running = true;
-	const int pointCount = 100;
+	const int pointCount = 1024;// 1024 * 1024 * 4;
 
 	OpenGLGraphicsEngine();
 

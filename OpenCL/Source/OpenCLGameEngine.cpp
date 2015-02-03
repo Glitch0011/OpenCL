@@ -76,7 +76,6 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 			std::vector< cl_device_id > lDeviceIds(lNbDeviceId);
 			clGetDeviceIDs(lPlatformIdToTry, CL_DEVICE_TYPE_GPU, lNbDeviceId, lDeviceIds.data(), 0);
 
-
 			// Create the properties for this context.
 			cl_context_properties lContextProperties[] = {
 				// We need to add information about the OpenGL context with
@@ -113,7 +112,7 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		}
 
 		this->context() = lContext;
-		//this->deviceID = lDeviceId;
+		this->device() = lDeviceId;
 		//this->platform = lPlatformId;
 
 		std::vector<char> data = loadText(".\\..\\Compute\\SimpleAddition.cl");
@@ -121,7 +120,14 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		cl::Program::Sources source(1, std::make_pair((char*)data.data(), data.size()));
 		program = cl::Program(context, source);
 		std::vector<cl::Device> realDevices{ lDeviceId };
-		program.build(realDevices);
+		err = program.build(realDevices);
+		if (err != 0)
+		{
+			size_t length;
+			std::string str;
+			program.getBuildInfo<std::string>(this->device, CL_PROGRAM_BUILD_LOG, &str);
+			return;
+		}
 
 		this->glEngine = glEngine;
 
@@ -139,43 +145,37 @@ void OpenCLGameEngine::SetupData()
 
 	this->graphicsBuffer = cl::BufferGL(this->context, CL_MEM_READ_WRITE, this->glEngine->bufferID, &err);
 
-	/*for (int i = 0; i < ARRAY_SIZE; i++)
-		numberData[i] = 1.0f * i;
-
-	inputBuffer = cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, ARRAY_SIZE * sizeof(float), numberData, &err);
-	sumBuffer = cl::Buffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, numGroups * sizeof(float), sum, &err);*/
-
 	kernel = cl::Kernel(program, "add_numbers", &err);
 
 	kernel.setArg(0, graphicsBuffer);
-	//kernel.setArg(1, localSize * sizeof(float), nullptr);
-	//kernel.setArg(2, sumBuffer);
+
+	queue = cl::CommandQueue(this->context, this->device, 0, &err);
+
+	size_t retSize = 0;
+	kernel.getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);
+	
+	this->globalSize = this->glEngine->pointCount;
+	this->localSize = 1;
+
+	numGroups = globalSize / localSize;
 }
 
 void OpenCLGameEngine::Update()
 {
-	cl_int err = CL_SUCCESS;
+	cl_uint err = 0;
+	cl::Event firstWait;
+	std::vector<cl::Memory> objs = { this->graphicsBuffer };
+	err = queue.enqueueAcquireGLObjects(&objs, nullptr, &firstWait);
 
-	cl::Event event;
-	cl::CommandQueue queue(context, devices[0], 0, &err);
-	queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), nullptr, &event);
+	cl::Event secondWait;
+	vector<cl::Event> secondWaits = { firstWait };
+	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &secondWaits, &secondWait);
 
-	event.wait();
+	cl::Event thirdWait;
+	vector<cl::Event> thirdWaits = { secondWait };
+	err = queue.enqueueReleaseGLObjects(&objs, &thirdWaits, &thirdWait);
 
-	queue.enqueueReadBuffer(sumBuffer, true, 0, sizeof(sum), sum);
-
-	total = 0.0f;
-	for (int i = 0; i < numGroups; i++)
-		total += sum[i];
-
-	actual_sum = 1.0f * ARRAY_SIZE / 2 * (ARRAY_SIZE - 1);
-
-	printf("Computed = %.1f.\n", total);
-
-	if (fabs(total - actual_sum) > 0.01 * fabs(actual_sum))
-		printf("Check failed.\n");
-	else
-		printf("Check passed.\n");
+	thirdWait.wait();
 }
 
 OpenCLGameEngine::~OpenCLGameEngine()

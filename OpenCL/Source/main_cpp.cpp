@@ -7,13 +7,13 @@ int CALLBACK WinMain(
 	_In_  int nCmdShow)
 {
 	OpenGLGraphicsEngine graphicsEngine;
-	//OpenCLGameEngine gameEngine = OpenCLGameEngine(&graphicsEngine);
+	OpenCLGameEngine gameEngine = OpenCLGameEngine(&graphicsEngine);
 
 	while (graphicsEngine.running)
 	{
 		graphicsEngine.Render();
 		graphicsEngine.Update();
-		//gameEngine.Update();
+		gameEngine.Update();
 	}
 	
 	return 0;

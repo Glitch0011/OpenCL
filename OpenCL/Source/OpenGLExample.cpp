@@ -50,34 +50,29 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	glfwSwapInterval(0);
 
 	if (wglSwapIntervalEXT)
-		wglSwapIntervalEXT(0);
-
-	
+		wglSwapIntervalEXT(1);
 
 	this->SetupEngine();
 }
 
 struct Point
 {
-	float x, y;
-	//float r, g, b, a;
+	float x, y, vx, vy;
 
-	Point(float x, float y, float r, float g, float b, float a)
+	Point(float x, float y)
 	{
 		this->x = x;
 		this->y = y;
-		/*this->r = r;
-		this->g = g;
-		this->b = b;
-		this->a = a;*/
+		this->vx = 0;
+		this->vy = 0;
 	}
 };
 
 void OpenGLGraphicsEngine::SetupEngine()
 {
 	std::mt19937 random;
-	std::uniform_int_distribution<unsigned int> uint_dist10(0, 50);
-	std::uniform_int_distribution<unsigned int> uintd1(0, 255);
+	std::uniform_real_distribution<float> uint_dist10(0, 50);
+	std::uniform_real_distribution<float> uintd1(0, 255);
 
 	std::vector<Point> points;
 	
@@ -86,12 +81,11 @@ void OpenGLGraphicsEngine::SetupEngine()
 		points.push_back(
 			Point(
 			uint_dist10(random),
-			uint_dist10(random),
-			uintd1(random),
-			uintd1(random),
-			uintd1(random),
-			0));
+			uint_dist10(random)));
 	}
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glGenBuffers(1, &bufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
@@ -122,6 +116,7 @@ void OpenGLGraphicsEngine::Render()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
+	glColor4f(1, 1, 1, 0.1f);
 	glPointSize(5.0);
 	
 	glDrawArrays(GL_POINTS, 0, pointCount);
