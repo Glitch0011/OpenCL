@@ -69,6 +69,8 @@
   <ItemGroup>
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\main_cpp.cpp" />
+    <ClCompile Include="Source\OpenCLGameEngine.cpp" />
+    <ClCompile Include="Source\OpenGLExample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Compute\SimpleAddition.cl">

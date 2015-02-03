@@ -4,18 +4,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IncludePath>$(SolutionDir)References\include;$(ProjectDir)Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)References\lib\x86;$(IncludePath);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)References\include;$(ProjectDir)Include;$(SolutionDir)References\Glew\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)References\lib\x86;$(IncludePath);$(SolutionDir)References\Glew\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
-      <AdditionalDependencies>OpenCL.lib;SDL2.lib;SDL2main.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenCL.lib;SDL2.lib;SDL2main.lib;glu32.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <PreprocessorDefinitions>_WIN32;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <PostBuildEvent>
-      <Command>XCOPY /Y "$(SolutionDir)References\lib\x86\SDL2.dll" "$(OutDir)"</Command>
+      <Command>XCOPY /Y "$(SolutionDir)References\lib\x86\SDL2.dll" "$(OutDir)"
+XCOPY /Y "$(SolutionDir)References\Glew\bin\Release\Win32\glew32.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup />
