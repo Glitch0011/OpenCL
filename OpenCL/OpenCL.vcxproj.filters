@@ -35,6 +35,24 @@
     <None Include="Compute\SimpleAddition.cl">
       <Filter>Compute Files</Filter>
     </None>
+    <None Include="Compute\SPH_DensityAndPressure.cl">
+      <Filter>Compute Files</Filter>
+    </None>
+    <None Include="Compute\Header.cl">
+      <Filter>Compute Files</Filter>
+    </None>
+    <None Include="Compute\SPH_Functions.cl">
+      <Filter>Compute Files</Filter>
+    </None>
+    <None Include="Compute\SPH_Header.cl">
+      <Filter>Compute Files</Filter>
+    </None>
+    <None Include="Compute\SPH_Viscosity.cl">
+      <Filter>Compute Files</Filter>
+    </None>
+    <None Include="Compute\SPH_UpdateBoids.cl">
+      <Filter>Compute Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\FileHelperFunctions.h">

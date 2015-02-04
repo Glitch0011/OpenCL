@@ -115,9 +115,23 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		this->device() = lDeviceId;
 		//this->platform = lPlatformId;
 
-		std::vector<char> data = loadText(".\\..\\Compute\\SimpleAddition.cl");
+		std::vector<std::vector<char>> data =
+		{
+			loadText(".\\..\\Compute\\Header.cl"),
+			loadText(".\\..\\Compute\\SPH_Header.cl"),
+			loadText(".\\..\\Compute\\SPH_Functions.cl"),
+			loadText(".\\..\\Compute\\SimpleAddition.cl"),
+			loadText(".\\..\\Compute\\SPH_DensityAndPressure.cl"),
+			loadText(".\\..\\Compute\\SPH_Viscosity.cl"),
+			loadText(".\\..\\Compute\\SPH_UpdateBoids.cl"),
+		};
 
-		cl::Program::Sources source(1, std::make_pair((char*)data.data(), data.size()));
+		std::vector<std::pair<const char*, size_t>> sources;
+		for (auto& dat : data)
+			sources.push_back(std::make_pair((char*)dat.data(), dat.size()));
+
+		cl::Program::Sources source(sources);
+
 		program = cl::Program(context, source);
 		std::vector<cl::Device> realDevices{ lDeviceId };
 		err = program.build(realDevices);
@@ -145,14 +159,17 @@ void OpenCLGameEngine::SetupData()
 
 	this->graphicsBuffer = cl::BufferGL(this->context, CL_MEM_READ_WRITE, this->glEngine->bufferID, &err);
 
-	kernel = cl::Kernel(program, "add_numbers", &err);
+	//kernel = cl::Kernel(program, "add_numbers", &err);
+	kernels["1"] = cl::Kernel(program, "calculateDensityAndPressure", &err);
+	kernels["2"] = cl::Kernel(program, "calculateViscosity", &err);
+	kernels["3"] = cl::Kernel(program, "calculateUpdateBoids", &err);
 
 	kernel.setArg(0, graphicsBuffer);
 
 	queue = cl::CommandQueue(this->context, this->device, 0, &err);
 
-	size_t retSize = 0;
-	kernel.getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);
+	/*size_t retSize = 0;
+	kernel.getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);*/
 	
 	this->globalSize = this->glEngine->pointCount;
 	this->localSize = 1;
@@ -163,19 +180,22 @@ void OpenCLGameEngine::SetupData()
 void OpenCLGameEngine::Update()
 {
 	cl_uint err = 0;
-	cl::Event firstWait;
+	cl::Event lastWait;
 	std::vector<cl::Memory> objs = { this->graphicsBuffer };
-	err = queue.enqueueAcquireGLObjects(&objs, nullptr, &firstWait);
+	err = queue.enqueueAcquireGLObjects(&objs, nullptr, &lastWait);
 
-	cl::Event secondWait;
-	vector<cl::Event> secondWaits = { firstWait };
-	err = queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &secondWaits, &secondWait);
+	for (auto& k : kernels)
+	{
+		k.second.setArg(0, graphicsBuffer);
 
-	cl::Event thirdWait;
-	vector<cl::Event> thirdWaits = { secondWait };
-	err = queue.enqueueReleaseGLObjects(&objs, &thirdWaits, &thirdWait);
+		vector<cl::Event> secondWaits = { lastWait };
+		err = queue.enqueueNDRangeKernel(k.second, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &secondWaits, &lastWait);
+	}
 
-	thirdWait.wait();
+	vector<cl::Event> thirdWaits = { lastWait };
+	err = queue.enqueueReleaseGLObjects(&objs, &thirdWaits, &lastWait);
+
+	lastWait.wait();
 }
 
 OpenCLGameEngine::~OpenCLGameEngine()

@@ -1,24 +1,24 @@
 
-typedef struct Boid{
-  float2 pos;
-  float2 vel;
-}Boid;
-
-__kernel void add_numbers(__global Boid* data)//, __local float* local_result, __global float* group_result)
+void func_test(Boid* test)
 {
+	test->velocity *= 0.99f;
+}
 
+__kernel void add_numbers(__global Boid* data)
+{
 	uint global_addr = get_global_id(0);
 	
 	Boid boid = data[global_addr];
 
-	float2 gravity; gravity.y = -0.01f; gravity.x = 0;
+	real4_t gravity; gravity.y = -0.01f; gravity.x = 0;
 
-	boid.vel += gravity;
-	boid.vel *= 0.99f;
+	boid.velocity += gravity;
 
-	float2 futurePos = boid.pos + boid.vel;
+	func_test(&boid);
+
+	real4_t futurePos = boid.pos + boid.velocity;
 	if (futurePos.y < 0)
-		boid.vel *= -1;
+		boid.velocity *= -1;
 	else
 		boid.pos = futurePos;
 

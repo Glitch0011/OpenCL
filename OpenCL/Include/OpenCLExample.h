@@ -8,6 +8,7 @@
 #include <CL/cl.hpp>
 #include <vector>
 #include <string>
+#include <map>
 
 #define ARRAY_SIZE 64
 
@@ -19,6 +20,8 @@ class OpenCLGameEngine
 	cl::Program program;
 	std::vector<cl::Device> devices;
 	cl::Kernel kernel;
+	std::map<std::string, cl::Kernel> kernels;
+	
 	cl::BufferGL graphicsBuffer;
 	cl::Device device;
 

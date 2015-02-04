@@ -55,16 +55,37 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	this->SetupEngine();
 }
 
+struct Pos
+{
+	float x, y, z, w;
+
+	Pos()
+	{
+		this->x = 0;
+		this->y = 0;
+		this->z = 0;
+		this->w = 0;
+	}
+};
+
 struct Point
 {
-	float x, y, vx, vy;
+	Pos pos;
+	Pos accel;
+	Pos velocity;
+	float pressure;
+	float density;
+	float mass;
+	float temp;
 
 	Point(float x, float y)
 	{
-		this->x = x;
-		this->y = y;
-		this->vx = 0;
-		this->vy = 0;
+		this->pos.x = x;
+		this->pos.y = y;
+
+		/*this->pressure = 0;
+		this->density = 0;
+		this->mass = 0.02;*/
 	}
 };
 
@@ -90,7 +111,7 @@ void OpenGLGraphicsEngine::SetupEngine()
 	glGenBuffers(1, &bufferID);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Point) * points.size(), nullptr, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * points.size(), &points[0].x);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Point) * points.size(), &points[0]);
 
 	GLuint vertexAttributeobject = 0;
 	glGenVertexArrays(1, &vertexAttributeobject);

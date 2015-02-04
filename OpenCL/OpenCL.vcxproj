@@ -73,9 +73,15 @@
     <ClCompile Include="Source\OpenGLExample.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Compute\Header.cl" />
     <None Include="Compute\SimpleAddition.cl">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DeploymentContent>
     </None>
+    <None Include="Compute\SPH_DensityAndPressure.cl" />
+    <None Include="Compute\SPH_Functions.cl" />
+    <None Include="Compute\SPH_Header.cl" />
+    <None Include="Compute\SPH_UpdateBoids.cl" />
+    <None Include="Compute\SPH_Viscosity.cl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\FileHelperFunctions.h" />
