@@ -23,6 +23,8 @@ class OpenCLGameEngine
 	std::map<std::string, cl::Kernel> kernels;
 	
 	cl::BufferGL graphicsBuffer;
+	cl::Buffer timeBuffer;
+
 	cl::Device device;
 
 	cl_int err = CL_SUCCESS;
@@ -45,7 +47,7 @@ public:
 
 	void SetupData();
 
-	void Update();
+	void Update(double);
 
 	~OpenCLGameEngine();
 };

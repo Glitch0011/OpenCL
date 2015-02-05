@@ -6,16 +6,18 @@ __kernel void calculateDensityAndPressure(__global Boid* data)
 
 	boid.density = 0;
 
-	for (int i=0;i<boidCount;++i)
+	for (int i = 0; i < boidCount; ++i)
 	{
-		real_t radSqr = lengthSquared((boid.pos - ((Boid)data[i]).pos).xyz);
-		if (radSqr <= h * h)
+		real_t radSqr = lengthSquared((boid.pos - data[i].pos).xyz);
+		if (radSqr <= h_constant * h_constant)
 			boid.density += Wpoly6(radSqr);
 	}
 
 	boid.density *= boid.mass;
 
 	boid.pressure = GAS_STIFFNESS * (boid.density - REST_DENSITY);
+
+	//barrier(CLK_GLOBAL_MEM_FENCE);
 
 	data[global_addr] = boid;
 }

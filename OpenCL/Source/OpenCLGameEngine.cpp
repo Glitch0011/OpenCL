@@ -9,37 +9,16 @@ typedef cl_int _stdcall _clGetGLContextInfoKHR(
 	void*,
 	size_t*);
 
+#include <Point.h>
+
 OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 {
 	cl_int err = CL_SUCCESS;
 
+	this->glEngine = glEngine;
+
 	try
 	{
-		/*std::vector<cl::Platform> platforms;
-		cl::Platform::get(&platforms);
-
-		if (platforms.size() == 0)
-			return;
-
-		cl_context_properties properties[] =
-		{
-			CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[1])(),
-			//CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-			//CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-			0
-		};
-
-		context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
-
-		devices = context.getInfo<CL_CONTEXT_DEVICES>();*/
-
-		/*size_t bytes = 0;
-		auto i = clGetExtensionFunctionAddress("clGetGLContextInfoKHR");
-		auto res = ((_clGetGLContextInfoKHR*)i)(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR, 0, nullptr, &bytes);
-		size_t devNum = bytes / sizeof(cl_device_id);
-		std::vector<cl_device_id> devs(devNum);
-		res = ((_clGetGLContextInfoKHR*)i)(properties, CL_DEVICES_FOR_GL_CONTEXT_KHR, bytes, &devs, nullptr);*/
-
 		cl_uint lNbPlatformId = 0;
 		cl_int err = 0;
 
@@ -49,7 +28,6 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		{
 			return;
 		}
-
 
 		// Loop on all platforms.
 		std::vector< cl_platform_id > lPlatformIds(lNbPlatformId);
@@ -86,7 +64,6 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 				CL_CONTEXT_PLATFORM, (cl_context_properties)lPlatformIdToTry,
 				0, 0,
 			};
-
 
 			// Look for the compatible context.
 			for (size_t j = 0; j < lDeviceIds.size(); ++j)
@@ -125,16 +102,21 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 			loadText(".\\..\\Compute\\SPH_Viscosity.cl"),
 			loadText(".\\..\\Compute\\SPH_UpdateBoids.cl"),
 		};
-
+		
 		std::vector<std::pair<const char*, size_t>> sources;
 		for (auto& dat : data)
 			sources.push_back(std::make_pair((char*)dat.data(), dat.size()));
 
+		/*char test[1024];
+		size_t s = 1024;
+		clGetDeviceInfo(this->device(), CL_DEVICE_EXTENSIONS, s, test, &s);*/
+		
 		cl::Program::Sources source(sources);
 
 		program = cl::Program(context, source);
 		std::vector<cl::Device> realDevices{ lDeviceId };
-		err = program.build(realDevices);
+		auto opts = "-cl-finite-math-only -DboidCount=" + std::to_string(this->glEngine->pointCount);
+		err = program.build(realDevices, opts.c_str());
 		if (err != 0)
 		{
 			size_t length;
@@ -142,8 +124,6 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 			program.getBuildInfo<std::string>(this->device, CL_PROGRAM_BUILD_LOG, &str);
 			return;
 		}
-
-		this->glEngine = glEngine;
 
 		SetupData();
 	}
@@ -159,17 +139,17 @@ void OpenCLGameEngine::SetupData()
 
 	this->graphicsBuffer = cl::BufferGL(this->context, CL_MEM_READ_WRITE, this->glEngine->bufferID, &err);
 
-	//kernel = cl::Kernel(program, "add_numbers", &err);
+	real_t time = 0.0f;
+	this->timeBuffer = cl::Buffer(this->context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(real_t), &time, &err);
+
 	kernels["1"] = cl::Kernel(program, "calculateDensityAndPressure", &err);
 	kernels["2"] = cl::Kernel(program, "calculateViscosity", &err);
 	kernels["3"] = cl::Kernel(program, "calculateUpdateBoids", &err);
 
-	kernel.setArg(0, graphicsBuffer);
-
 	queue = cl::CommandQueue(this->context, this->device, 0, &err);
 
-	/*size_t retSize = 0;
-	kernel.getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);*/
+	size_t retSize = 0;
+	kernels["1"].getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);
 	
 	this->globalSize = this->glEngine->pointCount;
 	this->localSize = 1;
@@ -177,25 +157,42 @@ void OpenCLGameEngine::SetupData()
 	numGroups = globalSize / localSize;
 }
 
-void OpenCLGameEngine::Update()
+#include <Point.h>
+
+void OpenCLGameEngine::Update(double timePassedInSeconds)
 {
 	cl_uint err = 0;
 	cl::Event lastWait;
+	vector<cl::Event> waits;
+
+	timePassedInSeconds *= 0.25;
+
+	real_t f = timePassedInSeconds;
+	err = queue.enqueueWriteBuffer(this->timeBuffer, false, 0, sizeof(real_t), &f, nullptr, &lastWait);
+
 	std::vector<cl::Memory> objs = { this->graphicsBuffer };
-	err = queue.enqueueAcquireGLObjects(&objs, nullptr, &lastWait);
+	waits = { lastWait };
+	err = queue.enqueueAcquireGLObjects(&objs, &waits, &lastWait);
 
 	for (auto& k : kernels)
 	{
-		k.second.setArg(0, graphicsBuffer);
+		k.second.setArg(0, this->graphicsBuffer);
 
-		vector<cl::Event> secondWaits = { lastWait };
-		err = queue.enqueueNDRangeKernel(k.second, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &secondWaits, &lastWait);
+		if (k.first == "3")
+			k.second.setArg(1, this->timeBuffer);
+		
+		waits = { lastWait };
+		err = queue.enqueueNDRangeKernel(k.second, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &waits, &lastWait);
 	}
 
-	vector<cl::Event> thirdWaits = { lastWait };
-	err = queue.enqueueReleaseGLObjects(&objs, &thirdWaits, &lastWait);
+	waits = { lastWait };
+	err = queue.enqueueReleaseGLObjects(&objs, &waits, &lastWait);
 
 	lastWait.wait();
+
+	/*void* data = queue.enqueueMapBuffer(this->graphicsBuffer, true, CL_MAP_READ, 0, sizeof(Point) * this->glEngine->pointCount);
+
+	queue.enqueueUnmapMemObject(this->graphicsBuffer, data, nullptr, &lastWait);*/
 }
 
 OpenCLGameEngine::~OpenCLGameEngine()

@@ -49,7 +49,6 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -85,9 +84,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\FileHelperFunctions.h" />
+    <ClInclude Include="Include\FrameLimiter.h" />
     <ClInclude Include="Include\main.h" />
     <ClInclude Include="Include\OpenCLExample.h" />
     <ClInclude Include="Include\OpenGLExample.h" />
+    <ClInclude Include="Include\Point.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -67,5 +67,11 @@
     <ClInclude Include="Include\OpenGLExample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\FrameLimiter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

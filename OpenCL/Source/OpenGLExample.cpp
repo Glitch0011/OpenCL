@@ -21,7 +21,6 @@ int OpenGLGraphicsEngine::GLFWCharCallback(GLFWwindow* pWindow, unsigned int pCh
 	return 0;
 }
 
-
 OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 {
 	auto err = glGetError();
@@ -47,7 +46,7 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	if (glewInit() != GLEW_OK)
 		return;
 
-	glfwSwapInterval(0);
+	//glfwSwapInterval(0);
 
 	if (wglSwapIntervalEXT)
 		wglSwapIntervalEXT(1);
@@ -55,44 +54,12 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	this->SetupEngine();
 }
 
-struct Pos
-{
-	float x, y, z, w;
-
-	Pos()
-	{
-		this->x = 0;
-		this->y = 0;
-		this->z = 0;
-		this->w = 0;
-	}
-};
-
-struct Point
-{
-	Pos pos;
-	Pos accel;
-	Pos velocity;
-	float pressure;
-	float density;
-	float mass;
-	float temp;
-
-	Point(float x, float y)
-	{
-		this->pos.x = x;
-		this->pos.y = y;
-
-		/*this->pressure = 0;
-		this->density = 0;
-		this->mass = 0.02;*/
-	}
-};
+#include <Point.h>
 
 void OpenGLGraphicsEngine::SetupEngine()
 {
 	std::mt19937 random;
-	std::uniform_real_distribution<float> uint_dist10(0, 50);
+	std::uniform_real_distribution<float> uint_dist10(-0.2, 0.2);
 	std::uniform_real_distribution<float> uintd1(0, 255);
 
 	std::vector<Point> points;
@@ -117,7 +84,7 @@ void OpenGLGraphicsEngine::SetupEngine()
 	glGenVertexArrays(1, &vertexAttributeobject);
 	glBindVertexArray(vertexAttributeobject);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(0, 2, gl_real_t, GL_FALSE, sizeof(Point), NULL);
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(vertexAttributeobject);
@@ -132,12 +99,12 @@ void OpenGLGraphicsEngine::Render()
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0, 50, 0, 50, -1, 1);
+	glOrtho(-1, 1, -1, 1, -1, 1);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glColor4f(1, 1, 1, 0.05f);
+	glColor4f(1, 1, 1, 0.5f);
 	glPointSize(5.0);
 	
 	glDrawArrays(GL_POINTS, 0, pointCount);

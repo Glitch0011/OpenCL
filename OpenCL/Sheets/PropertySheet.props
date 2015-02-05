@@ -10,7 +10,7 @@
   <ItemDefinitionGroup>
     <Link>
       <AdditionalDependencies>OpenCL.lib;glu32.lib;opengl32.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <ClCompile>
       <PreprocessorDefinitions>_WIN32;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>

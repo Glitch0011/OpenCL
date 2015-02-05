@@ -45,12 +45,3 @@ typedef struct Boid{
   real_t mass;
   real_t temp;
 }Boid;
-
-/*typedef struct Boid{
-  real3_t pos;
-  real3_t accel;
-  real3_t velocity;
-  real_t pressure;
-  real_t density;
-  real_t mass;
-}Boid;*/

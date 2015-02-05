@@ -3,40 +3,40 @@ typedef struct WALL{
   real3_t normal;
 }WALL;
 
-#define boundarySize 0.8
+#define boundarySize 0.5
 
 void collisionForce(Boid* boid)
 {
 	WALL _walls[4];
-	_walls[0].point.x = 1;
-	_walls[0].point.y = 0;
-	_walls[0].point.z = 0;
-	_walls[0].normal.x = -boundarySize;
+	_walls[0].normal.x = 1;
 	_walls[0].normal.y = 0;
 	_walls[0].normal.z = 0;
+	_walls[0].point.x = -boundarySize;
+	_walls[0].point.y = 0;
+	_walls[0].point.z = 0;
 
-	_walls[1].point.x = -1;
-	_walls[1].point.y = 0;
-	_walls[1].point.z = 0;
-	_walls[1].normal.x = boundarySize;
+	_walls[1].normal.x = -1;
 	_walls[1].normal.y = 0;
 	_walls[1].normal.z = 0;
+	_walls[1].point.x = boundarySize;
+	_walls[1].point.y = 0;
+	_walls[1].point.z = 0;
 
-	_walls[2].point.x = 0;
-	_walls[2].point.y = -1;
-	_walls[2].point.z = 0;
 	_walls[2].normal.x = 0;
-	_walls[2].normal.y = boundarySize;
+	_walls[2].normal.y = -1;
 	_walls[2].normal.z = 0;
+	_walls[2].point.x = 0;
+	_walls[2].point.y = boundarySize;
+	_walls[2].point.z = 0;
 
-	_walls[3].point.x = 0;
-	_walls[3].point.y = 1;
-	_walls[3].point.z = 0;
 	_walls[3].normal.x = 0;
-	_walls[3].normal.y = -boundarySize;
+	_walls[3].normal.y = 1;
 	_walls[3].normal.z = 0;
+	_walls[3].point.x = 0;
+	_walls[3].point.y = -boundarySize;
+	_walls[3].point.z = 0;
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		WALL wall = _walls[i];
 
@@ -55,27 +55,25 @@ __kernel void calculateViscosity(__global Boid* data)
 	uint global_addr = get_global_id(0);
 	Boid boid = data[global_addr];
 
-	real3_t gravity;
-	gravity.x = 0;
-	gravity.y = GRAVITY_ACCELERATION;
-	gravity.z = 0;
+	real3_t gravity = (real3_t)(0.0f, -GRAVITY_ACCELERATION, 0.0f);
 
-	real3_t f_pressure, f_viscosity, f_surface, f_gravity, n, colorFieldNormal;
-
-	f_gravity.x = gravity.x * boid.density;
-	f_gravity.y = gravity.y * boid.density;
-	f_gravity.z = gravity.z * boid.density;
+	real3_t f_pressure, f_viscosity, f_surface, f_gravity, colorFieldNormal;
+	f_pressure.xyz = 0;
+	f_viscosity.xyz = 0;
+	f_surface.xyz = 0;
+	f_gravity = (gravity * boid.density);
+	colorFieldNormal.xyz = 0;
 
 	real_t colorFieldLaplacian = 0;
 
-	for (int i=0;i<boidCount;++i)
+	for (int i = 0; i < boidCount; ++i)
 	{
 		Boid otherBoid = data[i];
 
 		real3_t diffPosition = (boid.pos - otherBoid.pos).xyz;
 		real_t radiusSquared = lengthSquared(diffPosition);
 
-		if (radiusSquared <= h*h)
+		if (radiusSquared <= h_constant * h_constant)
 		{
 			real3_t poly6Gradient, spikyGradient;
 
@@ -114,8 +112,11 @@ __kernel void calculateViscosity(__global Boid* data)
 	}
 
 	boid.accel.xyz = (f_pressure + f_viscosity + f_surface + f_gravity) / boid.density;
+	boid.accel.zw = 0;
 
 	collisionForce(&boid);
+
+	//barrier(CLK_GLOBAL_MEM_FENCE);
 
 	data[global_addr] = boid;
 }
