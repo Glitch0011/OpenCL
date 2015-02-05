@@ -116,6 +116,9 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		program = cl::Program(context, source);
 		std::vector<cl::Device> realDevices{ lDeviceId };
 		auto opts = "-cl-finite-math-only -DboidCount=" + std::to_string(this->glEngine->pointCount);
+#ifdef useDouble
+		opts += " -DCONFIG_USE_DOUBLE";
+#endif
 		err = program.build(realDevices, opts.c_str());
 		if (err != 0)
 		{

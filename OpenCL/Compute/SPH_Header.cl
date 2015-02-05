@@ -5,11 +5,11 @@
 //#define boidCount (128)
 //
 
-#define GAS_STIFFNESS 3.0
+#define GAS_STIFFNESS 3.0f
  /*3.0 //20.0 // 461.5  // Nm/kg is gas constant of water vapor*/
 
 //Lower = less compression
-#define REST_DENSITY 998.29
+#define REST_DENSITY 998.29f
 /*998.29 // kg/m^3 is rest density of water particle*/
 
 #define PARTICLE_MASS 0.02f
@@ -25,15 +25,14 @@
 #define SURFACE_THRESHOLD 0.01f
  /*7.065*/
 
-#define KERNEL_PARTICLES 20.0f
+#define GRAVITY_ACCELERATION 9.80665
 
-#define GRAVITY_ACCELERATION 9.80665f
-
-#define WALL_K 10000.0 
+#define WALL_K 10000.0f
 /*10000.0 // wall spring constant*/
 
-#define WALL_DAMPING 30
+#define WALL_DAMPING 30.0f
  /*-0.9 // wall damping constant*/
 
-#define BOX_SIZE 0.4
-#define PADDING 0.1
+#define BOX_SIZE 0.4f
+#define PADDING 0.1f
+#define boundarySize 0.5f

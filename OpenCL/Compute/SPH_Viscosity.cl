@@ -3,8 +3,6 @@ typedef struct WALL{
   real3_t normal;
 }WALL;
 
-#define boundarySize 0.5
-
 void collisionForce(Boid* boid)
 {
 	WALL _walls[4];
