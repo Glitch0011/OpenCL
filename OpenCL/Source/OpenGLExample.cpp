@@ -32,7 +32,7 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		
-	this->mainWindow = glfwCreateWindow(512, 512, "Hello", nullptr, nullptr);
+	this->mainWindow = glfwCreateWindow(512, 512, "OpenCL: Fluid Dynamics", nullptr, nullptr);
 
 	glfwSetWindowUserPointer(this->mainWindow, this);
 
@@ -45,11 +45,6 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 		return;
-
-	//glfwSwapInterval(0);
-
-	if (wglSwapIntervalEXT)
-		wglSwapIntervalEXT(1);
 
 	this->SetupEngine();
 }
