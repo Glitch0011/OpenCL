@@ -9,8 +9,7 @@
 #include <vector>
 #include <string>
 #include <map>
-
-#define ARRAY_SIZE 64
+#include <real_t.h>
 
 class OpenGLGraphicsEngine;
 
@@ -18,14 +17,14 @@ class OpenCLGameEngine
 {
 	cl::Context context;
 	cl::Program program;
-	std::vector<cl::Device> devices;
 	cl::Kernel kernel;
+
 	std::map<std::string, cl::Kernel> kernels;
-	
+	std::vector<cl::Device> devices;
+	cl::Device device;
+
 	cl::BufferGL graphicsBuffer;
 	cl::Buffer timeBuffer;
-
-	cl::Device device;
 
 	cl_int err = CL_SUCCESS;
 
@@ -36,8 +35,6 @@ class OpenCLGameEngine
 	int localSize = 4;
 	cl_int numGroups = globalSize / localSize;
 
-	//float numberData[100 * 2];// sum[2], total, actual_sum;
-
 	cl::Buffer inputBuffer, sumBuffer;
 	
 	OpenGLGraphicsEngine* glEngine;
@@ -47,7 +44,7 @@ public:
 
 	void SetupData();
 
-	void Update(double);
+	void Update(real_t);
 
 	~OpenCLGameEngine();
 };

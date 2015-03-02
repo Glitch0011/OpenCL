@@ -2,8 +2,8 @@
 __kernel void calculateDensityAndPressure(__global Boid* data)
 {
 	uint global_addr = get_global_id(0);
-	Boid boid = data[global_addr];
 
+	Boid boid = data[global_addr];
 	boid.density = 0;
 
 	for (int i = 0; i < boidCount; ++i)

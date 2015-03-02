@@ -66,15 +66,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\main_cpp.cpp" />
     <ClCompile Include="Source\OpenCLGameEngine.cpp" />
     <ClCompile Include="Source\OpenGLExample.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Compute\Header.cl" />
-    <None Include="Compute\SimpleAddition.cl">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</DeploymentContent>
+    <None Include="Compute\Header.cl">
+      <FileType>Document</FileType>
     </None>
     <None Include="Compute\SPH_DensityAndPressure.cl" />
     <None Include="Compute\SPH_Functions.cl" />
@@ -89,6 +87,7 @@
     <ClInclude Include="Include\OpenCLExample.h" />
     <ClInclude Include="Include\OpenGLExample.h" />
     <ClInclude Include="Include\Point.h" />
+    <ClInclude Include="Include\real_t.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

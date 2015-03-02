@@ -1,7 +1,8 @@
-typedef struct WALL{
-  real3_t point;
-  real3_t normal;
-}WALL;
+typedef struct WALL
+{
+	real3_t point;
+	real3_t normal;
+} WALL;
 
 void collisionForce(Boid* boid)
 {
@@ -96,8 +97,6 @@ __kernel void calculateViscosity(__global Boid* data)
 	f_viscosity *= VISCOSITY * boid.mass;
 
 	colorFieldNormal *= boid.mass;
-
-	//boid->normal = -1.0 * colorFieldNormal;
 
 	colorFieldLaplacian *= boid.mass;
 

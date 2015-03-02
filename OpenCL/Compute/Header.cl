@@ -36,7 +36,8 @@
 
 #endif
 
-typedef struct Boid{
+typedef struct Boid
+{
   real4_t pos;
   real4_t accel;
   real4_t velocity;
@@ -44,4 +45,4 @@ typedef struct Boid{
   real_t density;
   real_t mass;
   real_t temp;
-}Boid;
+} Boid;

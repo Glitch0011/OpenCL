@@ -11,6 +11,18 @@ typedef cl_int _stdcall _clGetGLContextInfoKHR(
 
 #include <Point.h>
 
+//http://stackoverflow.com/questions/1149620/how-to-write-to-the-output-window-in-visual-studios
+void Output(const char* szFormat, ...)
+{
+	char szBuff[1024];
+	va_list arg;
+	va_start(arg, szFormat);
+	_vsnprintf_s(szBuff, sizeof(szBuff), szFormat, arg);
+	va_end(arg);
+
+	OutputDebugString(szBuff);
+}
+
 OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 {
 	cl_int err = CL_SUCCESS;
@@ -71,12 +83,17 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 				cl_device_id lDeviceIdToTry = lDeviceIds[j];
 				cl_context lContextToTry = 0;
 
+				cl_int errRet;
+
 				lContextToTry = clCreateContext(
 					lContextProperties,
 					1, &lDeviceIdToTry,
-					0, 0,
-					&err
-					);
+					[](const char* a, const void* b, size_t c, void* d)
+					{
+						return;
+					} , nullptr,
+					&errRet);
+
 				if (err == CL_SUCCESS)
 				{
 					// We found the context.
@@ -90,17 +107,15 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 
 		this->context() = lContext;
 		this->device() = lDeviceId;
-		//this->platform = lPlatformId;
 
 		std::vector<std::vector<char>> data =
 		{
-			loadText(".\\..\\Compute\\Header.cl"),
-			loadText(".\\..\\Compute\\SPH_Header.cl"),
-			loadText(".\\..\\Compute\\SPH_Functions.cl"),
-			loadText(".\\..\\Compute\\SimpleAddition.cl"),
-			loadText(".\\..\\Compute\\SPH_DensityAndPressure.cl"),
-			loadText(".\\..\\Compute\\SPH_Viscosity.cl"),
-			loadText(".\\..\\Compute\\SPH_UpdateBoids.cl"),
+			loadText(".\\..\\..\\Compute\\Header.cl"),
+			loadText(".\\..\\..\\Compute\\SPH_Header.cl"),
+			loadText(".\\..\\..\\Compute\\SPH_Functions.cl"),
+			loadText(".\\..\\..\\Compute\\SPH_DensityAndPressure.cl"),
+			loadText(".\\..\\..\\Compute\\SPH_Viscosity.cl"),
+			loadText(".\\..\\..\\Compute\\SPH_UpdateBoids.cl"),
 		};
 		
 		std::vector<std::pair<const char*, size_t>> sources;
@@ -116,15 +131,18 @@ OpenCLGameEngine::OpenCLGameEngine(OpenGLGraphicsEngine* glEngine)
 		program = cl::Program(context, source);
 		std::vector<cl::Device> realDevices{ lDeviceId };
 		auto opts = "-cl-finite-math-only -DboidCount=" + std::to_string(this->glEngine->pointCount);
+
 #ifdef useDouble
 		opts += " -DCONFIG_USE_DOUBLE";
 #endif
+
 		err = program.build(realDevices, opts.c_str());
 		if (err != 0)
 		{
 			size_t length;
 			std::string str;
 			program.getBuildInfo<std::string>(this->device, CL_PROGRAM_BUILD_LOG, &str);
+			Output("%s", str);
 			return;
 		}
 
@@ -151,8 +169,8 @@ void OpenCLGameEngine::SetupData()
 
 	queue = cl::CommandQueue(this->context, this->device, 0, &err);
 
-	size_t retSize = 0;
-	kernels["1"].getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);
+	/*size_t retSize = 0;
+	kernels["1"].getWorkGroupInfo(this->device, CL_KERNEL_WORK_GROUP_SIZE, &retSize);*/
 	
 	this->globalSize = this->glEngine->pointCount;
 	this->localSize = 1;
@@ -162,7 +180,7 @@ void OpenCLGameEngine::SetupData()
 
 #include <Point.h>
 
-void OpenCLGameEngine::Update(double timePassedInSeconds)
+void OpenCLGameEngine::Update(real_t timePassedInSeconds)
 {
 	cl_uint err = 0;
 	cl::Event lastWait;
@@ -180,9 +198,7 @@ void OpenCLGameEngine::Update(double timePassedInSeconds)
 	for (auto& k : kernels)
 	{
 		k.second.setArg(0, this->graphicsBuffer);
-
-		if (k.first == "3")
-			k.second.setArg(1, this->timeBuffer);
+		k.second.setArg(1, this->timeBuffer); //Only the 3rd Kernel really needs this
 		
 		waits = { lastWait };
 		err = queue.enqueueNDRangeKernel(k.second, cl::NullRange, cl::NDRange(globalSize), cl::NDRange(localSize), &waits, &lastWait);
@@ -193,8 +209,8 @@ void OpenCLGameEngine::Update(double timePassedInSeconds)
 
 	lastWait.wait();
 
+	//Reads the data
 	/*void* data = queue.enqueueMapBuffer(this->graphicsBuffer, true, CL_MAP_READ, 0, sizeof(Point) * this->glEngine->pointCount);
-
 	queue.enqueueUnmapMemObject(this->graphicsBuffer, data, nullptr, &lastWait);*/
 }
 

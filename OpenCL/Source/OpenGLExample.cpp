@@ -28,10 +28,6 @@ OpenGLGraphicsEngine::OpenGLGraphicsEngine()
 	if (!glfwInit())
 		return;
 
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		
 	this->mainWindow = glfwCreateWindow(512, 512, "OpenCL: Fluid Dynamics", nullptr, nullptr);
 
 	glfwSetWindowUserPointer(this->mainWindow, this);
@@ -55,7 +51,6 @@ void OpenGLGraphicsEngine::SetupEngine()
 {
 	std::mt19937 random;
 	std::uniform_real_distribution<float> uint_dist10(-0.2, 0.2);
-	std::uniform_real_distribution<float> uintd1(0, 255);
 
 	std::vector<Point> points;
 	
